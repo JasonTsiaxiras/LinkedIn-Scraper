@@ -13,10 +13,16 @@ def navigate_login(url,driver):
     folder2 = driver.find_element_by_xpath("/html/body/nav/div/a[2]")
     folder2.click()
 
+    f = open("logindetails.txt", "r")
+    lines = f.readlines()
+    f.close()
+    username = lines[0].strip()
+    password = lines[1]
+
     element_user = driver.find_element_by_id('username')
-    element_user.send_keys('JMV.dummy@gmail.com')
+    element_user.send_keys(username)
     element_password = driver.find_element_by_id('password')
-    element_password.send_keys('$dummy2023')
+    element_password.send_keys(password)
     element_aanmelden = driver.find_element_by_xpath("//*[@id='organic-div']/form/div[3]/button")
     element_aanmelden.click()
 
@@ -68,3 +74,14 @@ def get_ids_on_page(driver):
     tags = doc.find_all("a", {"class" : html_class})
     job_ids = [x['href'].split('/')[3] for x in tags]
     return job_ids
+
+def save_id_data(search_keyword,scrape_date,job_ids):
+    search_keywords = [search_keyword] * len(job_ids)
+    scrape_dates = [scrape_date] * len(job_ids)
+    df = pd.DataFrame(data={'job_id':job_ids,'search_keyword':search_keywords,'scrape_date':scrape_dates})
+
+    with open(f'{scrape_date}', 'a+') as f:
+        df.to_csv(f, header=False, index=False)
+        f.close()
+
+    return

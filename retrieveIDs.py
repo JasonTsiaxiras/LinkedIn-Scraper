@@ -6,6 +6,7 @@ from selenium.webdriver.common.keys import Keys
 import time
 import pandas as pd
 from functions import navigate_login, enter_keyword, scroll_load_job_cards, get_li_tags, page_numbers, page_ember, get_ids_on_page
+from functions import save_id_data 
 
 # set options and initialise webdriver
 options = Options()
@@ -25,6 +26,7 @@ li_tags = get_li_tags(driver=driver)
 current_page_num, next_page_num, last_page_num = page_numbers(li_tags=li_tags)
 
 for p in range(1,int(last_page_num)+1):
+
     driver = scroll_load_job_cards(driver=driver) 
     li_tags = get_li_tags(driver=driver)
     current_page_num, next_page_num, last_page_num = page_numbers(li_tags=li_tags)
@@ -37,3 +39,5 @@ for p in range(1,int(last_page_num)+1):
         next_ember = page_ember(li_tags,next_page_num)
         print(next_ember)
         driver.find_element_by_id(next_ember).click()
+
+    save_id_data(search_keyword = search_keyword, scrape_date = str(pd.Timestamp.today().date()), job_ids = job_ids)
