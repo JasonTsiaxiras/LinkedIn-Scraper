@@ -5,6 +5,7 @@ import requests
 from selenium.webdriver.common.keys import Keys
 import time
 import pandas as pd
+from selenium.webdriver.common.action_chains import ActionChains
 
 def navigate_login(url,driver):
     driver.get(url)
@@ -31,6 +32,18 @@ def navigate_login(url,driver):
 def enter_keyword(keyword, driver):
     job_search = driver.find_element_by_xpath("//*[starts-with(@id, 'jobs-search-box-keyword-id-')]")
     job_search.send_keys(keyword+"\n")
+    return driver
+
+def click_on_24_hours(driver):
+    element = driver.find_element_by_class_name("search-reusables__filter-list")
+    doc = BeautifulSoup(element.get_attribute('innerHTML'), 'html.parser')
+    ember_id = doc.find("div", {"id": "hoverable-outlet-plaatsingsdatum-filter-value"}).parent.get('id')
+    driver.find_element_by_id(ember_id).click()
+    a = ActionChains(driver)
+    m = driver.find_element_by_id("timePostedRange-r86400")
+    a.move_to_element(m).click(m).perform()
+    driver.find_element_by_id(ember_id).click()
+
     return driver
 
 def scroll_load_job_cards(driver):

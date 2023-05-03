@@ -3,10 +3,11 @@ from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 import requests
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 import time
 import pandas as pd
 from functions import navigate_login, enter_keyword, scroll_load_job_cards, get_li_tags, page_numbers, page_ember, get_ids_on_page
-from functions import save_id_data 
+from functions import save_id_data, click_on_24_hours
 
 # set options and initialise webdriver
 options = Options()
@@ -18,6 +19,7 @@ driver = navigate_login(url='https://www.linkedin.com/jobs/',driver=driver)
 
 search_keyword = 'Data Analyst'
 driver = enter_keyword(keyword = search_keyword,driver= driver)
+driver = click_on_24_hours(driver=driver)
 
 driver = scroll_load_job_cards(driver=driver) 
 # possible way to improve this is by using: driver.find_element_by_class_name("scaffold-layout__list-container").get_attribute('innerHTML')
