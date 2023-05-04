@@ -91,10 +91,61 @@ def get_ids_on_page(driver):
 def save_id_data(search_keyword,scrape_date,job_ids):
     search_keywords = [search_keyword] * len(job_ids)
     scrape_dates = [scrape_date] * len(job_ids)
-    df = pd.DataFrame(data={'job_id':job_ids,'search_keyword':search_keywords,'scrape_date':scrape_dates})
+    df = pd.DataFrame(data={'job_id':job_ids,'search_keyword':search_keywords,'id_scrape_date':scrape_dates})
 
     with open(f'{scrape_date}', 'a+') as f:
-        df.to_csv(f, header=False, index=False)
+        df.to_csv(f, header=True, index=False)
         f.close()
 
     return
+
+#Below are functions for the retrieve job data script
+
+def load_ids(date='2023-05-03'):
+    df = pd.read_csv(date)
+    return df
+
+def navigate_job(job_id,driver):
+    """driver should be logged in and cookie accepted"""
+    
+    url = f"https://www.linkedin.com/jobs/view/{job_id}"
+    driver.get(url)
+    return driver
+
+def get_job_description_html_text(driver):
+    description_element = driver.find_element_by_id("job-details")
+    description_html = description_element.get_attribute('innerHTML')
+    
+    doc = BeautifulSoup(description_html,"html.parser")
+    description_text = doc.get_text(separator=' ')
+    
+    return description_html, description_text
+
+def get_primary_card(driver):
+    primary_element = driver.find_element_by_class_name("jobs-unified-top-card__primary-description")
+    primary_html = primary_element.get_attribute('innerHTML')
+    doc = BeautifulSoup(primary_html,"html.parser")
+    primary = doc.get_text(separator='')
+    return primary
+
+def clean_primary(primary):
+    primary_data = [x.lstrip() for x in primary.split('\n') if ((len(x) > 0) & (~x.isspace()))]
+    return primary_data
+
+def get_secondary_card(driver):
+    els = driver.find_elements_by_class_name('jobs-unified-top-card__job-insight')
+    sec = [BeautifulSoup(el.get_attribute('innerHTML'), 'html.parser').text.replace('\n','') for el in els]
+    return sec
+
+def get_skills(driver):
+    a = ActionChains(driver)
+    m = driver.find_element_by_class_name('jobs-unified-top-card__job-insight-text-button')
+    a.move_to_element(m).click(m).perform()
+
+    elem_skills = driver.find_element_by_class_name('job-details-skill-match-status-list')
+    html_skills = elem_skills.get_attribute('innerHTML')
+    doc_skills = BeautifulSoup(html_skills, 'html.parser')
+    text_skills = doc_skills.text
+    skills_list = [x.lstrip() for x in text_skills.split('\n') if (((len(x) > 0) & (~x.isspace())) & (x.lstrip() != 'Toevoegen'))]
+    
+    return skills_list
